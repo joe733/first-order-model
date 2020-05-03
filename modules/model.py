@@ -46,8 +46,7 @@ class Vgg19(torch.nn.Module):
         h_relu3 = self.slice3(h_relu2)
         h_relu4 = self.slice4(h_relu3)
         h_relu5 = self.slice5(h_relu4)
-        out = [h_relu1, h_relu2, h_relu3, h_relu4, h_relu5]
-        return out
+        return [h_relu1, h_relu2, h_relu3, h_relu4, h_relu5]
 
 
 class ImagePyramide(torch.nn.Module):
@@ -116,8 +115,7 @@ class Transform:
         new_coordinates = self.warp_coordinates(coordinates)
         grad_x = grad(new_coordinates[..., 0].sum(), coordinates, create_graph=True)
         grad_y = grad(new_coordinates[..., 1].sum(), coordinates, create_graph=True)
-        jacobian = torch.cat([grad_x[0].unsqueeze(-2), grad_y[0].unsqueeze(-2)], dim=-2)
-        return jacobian
+        return torch.cat([grad_x[0].unsqueeze(-2), grad_y[0].unsqueeze(-2)], dim=-2)
 
 
 def detach_kp(kp):

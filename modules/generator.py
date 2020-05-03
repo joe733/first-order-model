@@ -59,8 +59,8 @@ class OcclusionAwareGenerator(nn.Module):
     def forward(self, source_image, kp_driving, kp_source):
         # Encoding (downsampling) part
         out = self.first(source_image)
-        for i in range(len(self.down_blocks)):
-            out = self.down_blocks[i](out)
+        for down_block in self.down_blocks:
+            out = down_block(out)
 
         # Transforming feature representation according to deformation and occlusion
         output_dict = {}
@@ -79,7 +79,10 @@ class OcclusionAwareGenerator(nn.Module):
             out = self.deform_input(out, deformation)
 
             if occlusion_map is not None:
-                if out.shape[2] != occlusion_map.shape[2] or out.shape[3] != occlusion_map.shape[3]:
+                if not (
+                    out.shape[2] == occlusion_map.shape[2]
+                    and out.shape[3] == occlusion_map.shape[3]
+                ):
                     occlusion_map = F.interpolate(occlusion_map, size=out.shape[2:], mode='bilinear')
                 out = out * occlusion_map
 
@@ -87,8 +90,8 @@ class OcclusionAwareGenerator(nn.Module):
 
         # Decoding part
         out = self.bottleneck(out)
-        for i in range(len(self.up_blocks)):
-            out = self.up_blocks[i](out)
+        for up_block in self.up_blocks:
+            out = up_block(out)
         out = self.final(out)
         out = F.sigmoid(out)
 

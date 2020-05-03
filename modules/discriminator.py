@@ -16,10 +16,7 @@ class DownBlock2d(nn.Module):
         if sn:
             self.conv = nn.utils.spectral_norm(self.conv)
 
-        if norm:
-            self.norm = nn.InstanceNorm2d(out_features, affine=True)
-        else:
-            self.norm = None
+        self.norm = nn.InstanceNorm2d(out_features, affine=True) if norm else None
         self.pool = pool
 
     def forward(self, x):
@@ -42,12 +39,19 @@ class Discriminator(nn.Module):
                  sn=False, use_kp=False, num_kp=10, kp_variance=0.01, **kwargs):
         super(Discriminator, self).__init__()
 
-        down_blocks = []
-        for i in range(num_blocks):
-            down_blocks.append(
-                DownBlock2d(num_channels + num_kp * use_kp if i == 0 else min(max_features, block_expansion * (2 ** i)),
-                            min(max_features, block_expansion * (2 ** (i + 1))),
-                            norm=(i != 0), kernel_size=4, pool=(i != num_blocks - 1), sn=sn))
+        down_blocks = [
+            DownBlock2d(
+                num_channels + num_kp * use_kp
+                if i == 0
+                else min(max_features, block_expansion * (2 ** i)),
+                min(max_features, block_expansion * (2 ** (i + 1))),
+                norm=(i != 0),
+                kernel_size=4,
+                pool=(i != num_blocks - 1),
+                sn=sn,
+            )
+            for i in range(num_blocks)
+        ]
 
         self.down_blocks = nn.ModuleList(down_blocks)
         self.conv = nn.Conv2d(self.down_blocks[-1].conv.out_channels, out_channels=1, kernel_size=1)

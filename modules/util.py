@@ -25,9 +25,7 @@ def kp2gaussian(kp, spatial_size, kp_variance):
 
     mean_sub = (coordinate_grid - mean)
 
-    out = torch.exp(-0.5 * (mean_sub ** 2).sum(-1) / kp_variance)
-
-    return out
+    return torch.exp(-0.5 * (mean_sub ** 2).sum(-1) / kp_variance)
 
 
 def make_coordinate_grid(spatial_size, type):
@@ -44,9 +42,7 @@ def make_coordinate_grid(spatial_size, type):
     yy = y.view(-1, 1).repeat(1, w)
     xx = x.view(1, -1).repeat(h, 1)
 
-    meshed = torch.cat([xx.unsqueeze_(2), yy.unsqueeze_(2)], 2)
-
-    return meshed
+    return torch.cat([xx.unsqueeze_(2), yy.unsqueeze_(2)], 2)
 
 
 class ResBlock2d(nn.Module):
@@ -140,11 +136,18 @@ class Encoder(nn.Module):
     def __init__(self, block_expansion, in_features, num_blocks=3, max_features=256):
         super(Encoder, self).__init__()
 
-        down_blocks = []
-        for i in range(num_blocks):
-            down_blocks.append(DownBlock2d(in_features if i == 0 else min(max_features, block_expansion * (2 ** i)),
-                                           min(max_features, block_expansion * (2 ** (i + 1))),
-                                           kernel_size=3, padding=1))
+        down_blocks = [
+            DownBlock2d(
+                in_features
+                if i == 0
+                else min(max_features, block_expansion * (2 ** i)),
+                min(max_features, block_expansion * (2 ** (i + 1))),
+                kernel_size=3,
+                padding=1,
+            )
+            for i in range(num_blocks)
+        ]
+
         self.down_blocks = nn.ModuleList(down_blocks)
 
     def forward(self, x):
@@ -223,7 +226,7 @@ class AntiAliasInterpolation2d(nn.Module):
             kernel *= torch.exp(-(mgrid - mean) ** 2 / (2 * std ** 2))
 
         # Make sure sum of values in gaussian kernel equals 1.
-        kernel = kernel / torch.sum(kernel)
+        kernel /= torch.sum(kernel)
         # Reshape to depthwise convolutional weight
         kernel = kernel.view(1, 1, *kernel.size())
         kernel = kernel.repeat(channels, *[1] * (kernel.dim() - 1))
