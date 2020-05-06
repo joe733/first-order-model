@@ -92,7 +92,7 @@ if __name__ == "__main__":
     parser.add_argument("--format", default='.png', help='Storing format')
     parser.add_argument("--workers", default=1, type=int, help='Number of workers')
     parser.add_argument("--youtube", default='./youtube-dl', help='Path to youtube-dl')
- 
+
     parser.add_argument("--image_shape", default=(256, 256), type=lambda x: tuple(map(int, x.split(','))),
                         help="Image shape, None for no resize")
 
@@ -109,5 +109,4 @@ if __name__ == "__main__":
     video_ids = set(df['video_id'])
     pool = Pool(processes=args.workers)
     args_list = cycle([args])
-    for chunks_data in tqdm(pool.imap_unordered(run, zip(video_ids, args_list))):
-        None  
+    None  

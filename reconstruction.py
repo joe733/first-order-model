@@ -33,9 +33,11 @@ def reconstruction(config, generator, kp_detector, checkpoint, log_dir, dataset)
     kp_detector.eval()
 
     for it, x in tqdm(enumerate(dataloader)):
-        if config['reconstruction_params']['num_videos'] is not None:
-            if it > config['reconstruction_params']['num_videos']:
-                break
+        if (
+            config['reconstruction_params']['num_videos'] is not None
+            and it > config['reconstruction_params']['num_videos']
+        ):
+            break
         with torch.no_grad():
             predictions = []
             visualizations = []

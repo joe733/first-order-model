@@ -98,7 +98,7 @@ class _SynchronizedBatchNorm(_BatchNorm):
         to_reduce = [j for i in to_reduce for j in i]  # flatten
         target_gpus = [i[1].sum.get_device() for i in intermediates]
 
-        sum_size = sum([i[1].sum_size for i in intermediates])
+        sum_size = sum(i[1].sum_size for i in intermediates)
         sum_, ssum = ReduceAddCoalesced.apply(target_gpus[0], 2, *to_reduce)
         mean, inv_std = self._compute_mean_std(sum_, ssum, sum_size)
 
@@ -182,7 +182,7 @@ class SynchronizedBatchNorm1d(_SynchronizedBatchNorm):
     """
 
     def _check_input_dim(self, input):
-        if input.dim() != 2 and input.dim() != 3:
+        if input.dim() not in [2, 3]:
             raise ValueError('expected 2D or 3D input (got {}D input)'
                              .format(input.dim()))
         super(SynchronizedBatchNorm1d, self)._check_input_dim(input)
