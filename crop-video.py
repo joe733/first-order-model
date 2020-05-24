@@ -34,8 +34,7 @@ def bb_intersection_over_union(boxA, boxB):
     interArea = max(0, xB - xA + 1) * max(0, yB - yA + 1)
     boxAArea = (boxA[2] - boxA[0] + 1) * (boxA[3] - boxA[1] + 1)
     boxBArea = (boxB[2] - boxB[0] + 1) * (boxB[3] - boxB[1] + 1)
-    iou = interArea / float(boxAArea + boxBArea - interArea)
-    return iou
+    return interArea / float(boxAArea + boxBArea - interArea)
 
 
 def join(tube_bbox, bbox):
